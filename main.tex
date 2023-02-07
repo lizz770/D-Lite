@@ -128,63 +128,8 @@
   \item Обозначим множество $\textbf{\emph{Succ(s)}} \subseteq \textbf{\emph{V}}$ как множество вершин, исходящих из вершины \textbf{\emph{s}}.
   \item Обозначим множество $\textbf{\emph{Pred(s)}} \subseteq \textbf{\emph{V}}$ как множество вершин,входящих в вершину \textbf{\emph{s}}.
 \end{itemize}
-Возвращает список состояний-преемников для состояния \textbf{\emph{u}} , поскольку это 8-полосный график этот список содержит все соседние ячейки. Если ячейка  не занята, и в этом случае у нее нет преемников.
-\begin{lstlisting}[language=C,style=C]
-void Dstar::getSucc(state u,list<state> &s) {
 
-    s.clear();
-    u.k.first  = -1;
-    u.k.second = -1;
 
-    if (occupied(u)) return;
-    u.x += 1;
-    s.push_front(u);
-    u.y += 1;
-    s.push_front(u);
-    u.x -= 1;
-    s.push_front(u);
-    u.x -= 1;
-    s.push_front(u);
-    u.y -= 1;
-    s.push_front(u);
-    u.y -= 1;
-    s.push_front(u);
-    u.x += 1;
-    s.push_front(u);
-    u.x += 1;
-    s.push_front(u);
-}
-\end{lstlisting}
-
-\newpage
-Возвращает список всех состояний-предшественников для состояния \textbf{\emph{u}}.
-Поскольку это для 8-полосного связного графа, список содержит все соседи для состояния \textbf{\emph{u}}. Занятые соседи не добавляются в список.
-\begin{lstlisting}[language=C,style=C]
-void Dstar::getPred(state u,list<state> &s) {
-
-    s.clear();
-    u.k.first  = -1;
-    u.k.second = -1;
-
-    u.x += 1;
-    if (!occupied(u)) s.push_front(u);
-    u.y += 1;
-    if (!occupied(u)) s.push_front(u);
-    u.x -= 1;
-    if (!occupied(u)) s.push_front(u);
-    u.x -= 1;
-    if (!occupied(u)) s.push_front(u);
-    u.y -= 1;
-    if (!occupied(u)) s.push_front(u);
-    u.y -= 1;
-    if (!occupied(u)) s.push_front(u);
-    u.x += 1;
-    if (!occupied(u)) s.push_front(u);
-    u.x += 1;
-    if (!occupied(u)) s.push_front(u);
-
-}
-\end{lstlisting}
 Функция  0 $\leq$ \textbf{\emph{c(s,s') }} $\leq$ +$\infty$ будет возвращать стоимость ребра \textbf{\emph{(s,s')}}. При этом \textbf{\emph{(s,s')=}}$+\infty$ будет тогда и только тогда, когда ребра \textbf{\emph{(s,s')}} не существует.\\
 Возвращает стоимость перехода из состояния a в состояние b. Это может быть либо стоимость переезда из состояния a  в состояние b,мы выбрали первое.
 Это также стоимость в 8 сторон
@@ -202,7 +147,6 @@ double Dstar::cost(state a, state b) {
 }
 \end{lstlisting}
 
-\newpage
 
 \paragraph{Определение}
 Будем называть \textbf{\emph{rhs}}-значением (значение с правой стороны) такую функцию \textbf{\emph{rhs(s)}}, которая будет возвращать потенциальное минимальное расстояние от \textbf{\emph{f}} до \textbf{\emph{s}} по следующим правилам:
@@ -297,7 +241,6 @@ state Dstar::calculateKey(state u) {
 \paragraph{Примечание:} Так же следует отметить, что функция $init$ не обязана инициализировать абсолютно все вершины перед стартом алгоритма. Это важно, так как на практике число вершин может быть огромным, и только немногие будут пройдены роботом в процессе движения. Так же это дает возможность добавления/удаления ребер без потери устойчивости всех подграфов данного графа.\\
 Инициализация d star начинается с координат начала и цели, остальное в соответствии c 
 документацией [S. Koenig, 2002]
-\newpage
 \begin{lstlisting}[language=C,style=C]
 void Dstar::init(int sX, int sY, int gX, int gY) {
 
@@ -383,9 +326,9 @@ void Dstar::updateCell(int x, int y, double val) {
 \paragraph{Теорема (О монотонности изменения ключей):}
 В течение выполнения функции $ComputeShortestPath$ вершины, взятые из очереди, монотонно не убывают.
 \paragraph{Теорема (О необратимой насыщенности):}
-Если в функциибыла $ComputeShortestPath$ взята переполненная вершина, то на следующей итерации она станет насыщенной.
+Если в функции была $ComputeShortestPath$ взята переполненная вершина, то на следующей итерации она станет насыщенной.
 \paragraph{Теорема}
-После выполнения функции $ComputeShortestPath$ можно восстановить путь из $f в t$. Для этого, начиная с вершины $t$, нужно постоянно передвигаться к такой вершине $s′$, входящей в $t$, чтобы $g(s′)+c(s′,s)$ было минимальным, до тех пора, пока не будет достигнута вершина $f$.
+После выполнения функции $ComputeShortestPath$ можно восстановить путь из $f$ в $t$. Для этого, начиная с вершины $t$, нужно постоянно передвигаться к такой вершине $s′$, входящей в $t$, чтобы $g(s′)+c(s′,s)$ было минимальным, до тех пора, пока не будет достигнута вершина $f$.
 \paragraph{Теорема (Свен Кёниг, Об устойчивой насыщенности вершин):}Функция\\ $ComputeShortestPath$ в данной версии алгоритма расширяет вершину максимум 2 раза, а именно 1 раз, если вершина ненасыщена, и максимум 1 раз, если она переполнена.
 \begin{itemize}
 \item Прекращаем планирование после нескольких шагов, "maxsteps" мы делаем это
@@ -488,7 +431,6 @@ void Dstar::makeNewCell(state u) {
     cellHash[u] = tmp;
 }
 \end{lstlisting}
-\newpage
 Возвращает значение true, если ячейка занята (недоступна для обхода),в противном случае значение false. непроходимые отмечены стоимостью < 0.
 \begin{lstlisting}[language=C,style=C]
 bool Dstar::occupied(state u) {
@@ -499,7 +441,6 @@ bool Dstar::occupied(state u) {
     return (cur->second.cost < 0);
 }
 \end{lstlisting}
-
 
 \paragraph{Оптимизация евклидова пути }
 Получение пути из сгенерированной D* карты затрат обычно выполняется путем запуска с начального узла и выполнения жадного поиска путем расширения последующих узлов с наименьшими затратами до цели. \\
@@ -574,7 +515,6 @@ bool Dstar::replan() {
     return true;
 }
 \end{lstlisting}
-\newpage
 
 \paragraph{Main} Функция $Main$ где мы принимаем входные данные.
 \begin{itemize}
@@ -616,19 +556,112 @@ int main() {
     return 0;
 }
 \end{lstlisting}
-\newpage
 \begin{center}
    \section*{Пример работы}
 \end{center}
-Итерации в функции $ComputeShortestPath$ на исходном графе.
-    \begin{center}
-        \includegraphics[width=0.45\textwidth]{img/robot.png}
+Рассмотрим краткий пример с пятью узлами.Робот начинает с узла А и его цель найти кратчайший путь к узлу G,за исключением того что граф может измениться по мере прохождением робота или робот может получить новую информацию.\\
+Изначально робот думает что все узлы доступны.Он знает что все длины пути равны 1 за исключением пути от D до G=10.Это двунаправленный граф,каждое ребро идет в обоих направлениях.\\
+Эвристика - это количество узлов до начального расстояния.
+Все узлы правильно локально согласованны так как g(s)=rhs(s)\\
+\\
+\begin{center}
+        \includegraphics[width=1\textwidth]{img/example1.png}
+    \end{center}
+Мы помещаем вершину G в Openlist(очередь) используя формулу\\
+$<min[g(s),rhs(s)]+h(s,s_{start})+k_m,min[g(s),rhs(s)]>$
+Теперь у нас есть один узел(вершина в очереди).Так что нам придеться выйти из очереди.
+\begin{itemize}
+    \item удаляем узел G из OpenList
+    \item проверка computeShortestPath(g(s)>rhs(s)),следовательно g(s)=rhs(s)=0
+\end{itemize}
+\begin{center}
+        \includegraphics[width=1\textwidth]{img/example2.png}
+    \end{center}    
+Теперь мы собираемся обновить значения $rhs(s)$ соседей узла G  и в каждом случае значение будет минимальным по формуле $rhs(s)=min_{s'\in Succ(s)}(g(s')+s(s,s')$.И добавить в очередь $OpenList=[<3,2>;<12,10>]$
+\begin{center}
+        \includegraphics[width=1\textwidth]{img/example2_1.png}
+    \end{center}
+\newpage
+Теперь мы исключим из очереди еще один узел C так как у него наименьший ключ <3,1> .Проверка computeShortestPath(g(s)>rhs(s)),следовательно g(s)=rhs(s)=1 И обновим значения rhs(s) соседей узла C.\\Теперь в очереди $OpenList=[<3,2>;<4,2>]$
+\begin{center}
+        \includegraphics[width=1\textwidth]{img/example2_2.png}
+    \end{center}
+Дальше мы удаляем из очереди узел B так как у него наименьший ключ <3,2>Проверка computeShortestPath(g(s)>rhs(s)),следовательно g(s)=rhs(s)=2 И обновим значения rhs(s) соседей узла B.Мы не изменяем ключево значение узла D так как стоимость из G->C->D будет меньше чем из G->C->B->D
+\\Теперь в очереди $OpenList=[<3,3>;<4,2>]$
+\begin{center}
+        \includegraphics[width=1\textwidth]{img/example2_3.png}
+    \end{center}
+Далее мы удаляем из очереди узел A так как у него наименьший ключ.Проверка computeShortestPath(g(s)>rhs(s)),следовательно g(s)=rhs(s)=3. $OpenList=[<4,2>]$ И на это мы закончили.
+\begin{center}
+        \includegraphics[width=1\textwidth]{img/example2_4.png}
+    \end{center}
+Робот переместился к своему следующему лучшему месту узлу B.Мы обновляем значения эвристики h для каждого узла в графе. Мы не изменяем очередь, но также должны обновить $k_m=1$ Появляеться препятсвие.В точке С есть препятсвие, которе робот теперь может видеть так как он ближе переместился к узлу C, но раньше он его не видел. Мы укажем эти изменения изменив ребра узла С на стоимость равной бесконечность.Это означает что робот никогда не сможет туда добраться.
+\begin{center}
+        \includegraphics[width=1\textwidth]{img/example3.png}
+         \includegraphics[width=1\textwidth]{img/example4.png}
+    \end{center}
+Далее мы собираемся обновить значения rhs узла B  и его соседей.\\$OpenList=[<3,1>;<3,2><5,3>]$
+\begin{center}
+         \includegraphics[width=1\textwidth]{img/example4_1.png}
+    \end{center}
+\newpage
+Далее мы удаляем из очереди узел C.Проверка $computeShortestPath(g(s)<rhs(s))$,следовательно $g(s)=\infty$
+\begin{center}
+         \includegraphics[width=1\textwidth]{img/example5.png}
+    \end{center}
+Далее мы удаляем из очереди узел B так как это наименьшее значение в очереди.Проверка 
+$computeShortestPath(g(s)<rhs(s)) 2 < 4$,следовательно $g(s)=\infty$. Обновляем значение rhs  соседей и добавляем в OpenList изменившиеся значения.\\OpenList=[<5,3>;<12,10>]
+\begin{center}
+         \includegraphics[width=1\textwidth]{img/example5_1.png}
+    \end{center}
+Так как <5,3> меньше чем <12,10> удаляем из очереди вершину А.\\Проверка 
+$computeShortestPath(g(s)<rhs(s)) 3 < \infty $,следовательно $g(s)=\infty$. Обновляем значение rhs соседей и добавляем в OpenList изменившиеся значения.\\OpenList=[<12,10>;<12,11>]
+\begin{center}
+         \includegraphics[width=1\textwidth]{img/example5_2.png}
+    \end{center}
+Так как <12,10> меньше чем <12,11> удаляем из очереди вершину D.\\Проверка 
+$computeShortestPath(g(s)>rhs(s)) \infty >10 $,следовательно $g(s)=rhs(s)=10$. Обновляем значение rhs соседей и добавляем в OpenList изменившиеся значения.\\OpenList=[<12,11>]
+\begin{center}
+         \includegraphics[width=1\textwidth]{img/example5_3.png}
+    \end{center}
+Удаляем из очереди вершину B.Проверка 
+$computeShortestPath(g(s)>rhs(s)) \infty >11 $,следовательно $g(s)=rhs(s)=11$.Теперь узлы в графе локально согласованны. Обновляем значение rhs соседей и добавляем в OpenList изменившиеся значения.\\OpenList=[<14,12>] 
+\begin{center}
+         \includegraphics[width=1\textwidth]{img/example5_4.png}
+    \end{center}
+Мы нашли лучший и единственный путь из B->D->G  следовательно робот движеться в D.Изменяеться эвристика всех значений узлов на графе. Обновление значения $k_m=2$
+\begin{center}
+         \includegraphics[width=1\textwidth]{img/example6.png}
+    \end{center}
+Оказываеться препятсвие тоже движеться.Происходит изменение стоимости ребер узла вершины B,теперь их стоимость равна бесконечности.Также обнавляються значения rhs соседей вершины D.
+В этом случае значение rhs(G) никогда не меняеться потому что растояние G до самой себя всегда будет равно нулю.
+OpenList=[<4,1>,<14,1>]
+\begin{center}
+         \includegraphics[width=1\textwidth]{img/example6_1.png}
+    \end{center}
+Следовательно мы удаляем из очереди узел C.\\Проверка 
+$computeShortestPath(g(s)>rhs(s)) \infty >1 $,следовательно $g(s)=rhs(s)=1$.\\Обновляем значение rhs соседей и добавляем в OpenList изменившиеся значения.\\OpenList=[<4,2>;<14,11>] 
+\begin{center}
+         \includegraphics[width=1\textwidth]{img/example6_2.png}
+    \end{center}
+Потом удаляем из очереди узел D.\\Проверка 
+$computeShortestPath(g(s)>rhs(s)) 10 >2 $,следовательно $g(s)=rhs(s)=2$.\\Обновляем значение rhs соседей и добавляем в OpenList изменившиеся значения.\\OpenList=[<14,11>] 
+\begin{center}
+         \includegraphics[width=1\textwidth]{img/example6_3.png}
+    \end{center}
+Мы обнаружили путь из D->C->G и робот перемещаеться в узел C.Также обновляеться эвристика для всех улозлов графа.\\
+Препятсвие не стоит на месте и приследует робота.Следовательно ребра узла D становяться стоять бесконечность. Также обновляться значение $k_m=3$ Обновляем значение rhs соседей и добавляем в OpenList изменившиеся значения.
+\begin{center}
+         \includegraphics[width=1\textwidth]{img/example7.png}
+         \includegraphics[width=1\textwidth]{img/example7_1.png}
+         \includegraphics[width=1\textwidth]{img/example8.png}
     \end{center}
 
-Итерации в функции $ComputeShortestPath$ после изменения графа. (Второй вызов функции)
-    \begin{center}
-        \includegraphics[width=0.45\textwidth]{img/robot2.png}
-    \end{center}
+
+
+
+
+    
 \newpage  
 \begin{center}
    \section*{Тестирование и анализ производительности}
