@@ -545,8 +545,8 @@ bool Dstar::replan() {
     int res = computeShortestPath();
     int curt=0;
 
-    for (int j=0;j<6*2;j++){
-        char out_f[6];
+    for (int j=0;j<6;j++){
+        char out_f[120];
         sprintf(out_f,"tes/%i/out.txt",curt);
         FILE* file= fopen(out_f,"w+t");
         fprintf(file ,
@@ -566,6 +566,7 @@ bool Dstar::replan() {
                 getRHS(s_start),//правое значение
                 getG(s_start));//значение G
 
+        curt++;
     }
     /*printf(""
            "computeShortestPath: %d,\n"
@@ -636,24 +637,27 @@ bool Dstar::replan() {
 int main() {
     Dstar *dstar = new Dstar();
     list<state> mypath;
-
     int cur=0;
-
 
     int n1=12;
     int arr[n1];
-    for(int j=0;j<6*2;j++){
-        char in_f[6];
+    for (int j=0;j<6;j++)
+    {
+        char in_f[120];
 
         sprintf(in_f,"tes/%i/in.txt",cur);
         FILE* in_file= fopen(in_f,"r");
         for (int i = 0; i < n1; i++){
             fscanf(in_file, "%d,", &arr[i] );
         }
+        for(int t=0;t<n1;t++){
+            cout<<arr[t]<<" ";
+        }
         auto begin = std::chrono::steady_clock::now();
         dstar->init(arr[0],arr[1],arr[2],arr[3]); // set start to (0,0) and goal to (10,5)
         dstar->updateCell(arr[4],arr[5],-1);     // установите ячейку (3,4) недоступной для обхода
-        dstar->updateCell(arr[6],arr[7],100); // установить набор (2,2), чтобы иметь стоимость 42,432
+        dstar->updateCell(arr[6],arr[7],100);// установить набор (2,2), чтобы иметь стоимость 42,432
+
 
         dstar->replan();               // plan a path
         mypath = dstar->getPath();     // retrieve path
@@ -667,11 +671,16 @@ int main() {
         dstar->replan();               // спланируйте путь
         mypath = dstar->getPath();     // извлекать путь
 
+        for(int t=0;t<n1;t++){
+            cout<<arr[t];
+        }
+
         auto end = std::chrono::steady_clock::now();
         auto elapsed_ms = std::chrono::duration_cast<std::chrono::milliseconds>(end - begin);
         std::cout << "The time: " << elapsed_ms.count() << " ms\n";
 
     }
+
 
     return 0;
 }
