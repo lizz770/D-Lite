@@ -2,7 +2,10 @@
 #include <cmath>
 #include <queue>
 #include <list>
-#include<cstdio>
+#include<stdio.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <conio.h>
 #include <string>
 #include <chrono>
 #include <ext/hash_map>
@@ -256,9 +259,7 @@ int Dstar::computeShortestPath() {
             fprintf(stderr, "At maxsteps\n");
             return -1;
         }
-
         state u;
-
         bool test = (getRHS(s_start) != getG(s_start));
 
         // ленивое удаление
@@ -266,7 +267,6 @@ int Dstar::computeShortestPath() {
             if (openList.empty()) return 1;
             u = openList.top();
             openList.pop();
-
             if (!isValid(u)) continue;
             if (!(u < s_start) && (!test)) return 2;
             break;
@@ -297,7 +297,6 @@ int Dstar::computeShortestPath() {
 }
 
 //Возвращает значение true, если x и y находятся в пределах 10E-5, в противном случае значение false
-//Returns true if x and y are within 10E-5, false otherwise
 
 bool Dstar::close(double x, double y) {
 
@@ -305,7 +304,6 @@ bool Dstar::close(double x, double y) {
     return (fabs(x-y) < 0.00001);
 }
 
-//Согласно [S. Кениг, 2002]
 void Dstar::updateVertex(state u) {
     list<state> s;
     list<state>::iterator i;
@@ -325,7 +323,6 @@ void Dstar::updateVertex(state u) {
 }
 
 //Добавляем состояние u в открытый список и открытый хэш.
-//Inserts state u into openList and openHash.
 void Dstar::insert(state u) {
 
     ds_oh::iterator cur;
@@ -394,7 +391,6 @@ double Dstar::cost(state a, state b) {
 void Dstar::updateCell(int x, int y, double val) {
 
     state u;
-
     u.x = x;
     u.y = y;
 
@@ -407,7 +403,6 @@ void Dstar::updateCell(int x, int y, double val) {
 }
 
 /*
- * Returns a list of successor states for state u, since this is an
  * Возвращает список состояний-преемников для состояния u, поскольку это
  * 8-полосный график этот список содержит все соседние ячейки. Если не
  * ячейка занята, и в этом случае у нее нет преемников.
@@ -534,7 +529,6 @@ void Dstar::updateGoal(int x, int y) {
         updateCell(kk->first.x, kk->first.y, kk->second);
     }
 
-
 }
 
 
@@ -549,10 +543,43 @@ bool Dstar::replan() {
 
     path.clear();
     int res = computeShortestPath();
-    FILE *file;
-    file=fopen("out.txt","w+t");
-    fprintf(file ,"res: %d ols: %d ohs: %d tk: [%f %f] sk: [%f %f] sgr: (%f,%f)\n",res,openList.size(), openHash.size(), openList.top().k.first, openList.top().k.second, s_start.k.first, s_start.k.second, getRHS(s_start), getG(s_start));
-    printf("res: %d ols: %d ohs: %d tk: [%f %f] sk: [%f %f] sgr: (%f,%f)\n",res,openList.size(), openHash.size(), openList.top().k.first, openList.top().k.second, s_start.k.first, s_start.k.second, getRHS(s_start), getG(s_start));
+    int curt=0;
+
+    for (int j=0;j<6*2;j++){
+        char out_f[6];
+        sprintf(out_f,"tes/%i/out.txt",curt);
+        FILE* file= fopen(out_f,"w+t");
+        fprintf(file ,
+                "computeShortestPath: %d,\n"
+                "openList.size: %d,\n"
+                "openHash.size: %d\n"
+                "openList.top.k.first_second: [%f %f]\n"
+                "s_start.k.first_second: [%f %f]\n"
+                "getRHS_getG: (%f,%f)\n",
+                res,
+                openList.size(),//кол-во оставшихся вершин в списке
+                openHash.size(),
+                openList.top().k.first,//первая вершина в открытом списке
+                openList.top().k.second,//последняя вершина в открытом списке
+                s_start.k.first,//1 значение начальной вершины
+                s_start.k.second,//2 значение начальной вергины
+                getRHS(s_start),//правое значение
+                getG(s_start));//значение G
+
+    }
+    /*printf(""
+           "computeShortestPath: %d,\n"
+           "openList.size: %d,\n"
+           "openHash.size: %d\n"
+           "openList.top.k.first_second: [%f %f]\n"
+           "s_start.k.first_second: [%f %f]\n"
+           "getRHS_getG: (%f,%f)\n",
+           res,
+           openList.size(),
+           openHash.size(),
+           openList.top().k.first,openList.top().k.second,
+           s_start.k.first, s_start.k.second,
+           getRHS(s_start), getG(s_start));*/
     if (res < 0) {
         fprintf(stderr, "НЕТ ПУТИ К ЦЕЛИ\n");
         return false;
@@ -609,34 +636,42 @@ bool Dstar::replan() {
 int main() {
     Dstar *dstar = new Dstar();
     list<state> mypath;
-    FILE *file;
-    file = fopen("test1.txt", "r");
 
-    int n1;
+    int cur=0;
+
+
+    int n1=12;
     int arr[n1];
-    for (int i = 0; i < n1; i++){
-        fscanf(file, "%d,", &arr[i] );
+    for(int j=0;j<6*2;j++){
+        char in_f[6];
+
+        sprintf(in_f,"tes/%i/in.txt",cur);
+        FILE* in_file= fopen(in_f,"r");
+        for (int i = 0; i < n1; i++){
+            fscanf(in_file, "%d,", &arr[i] );
+        }
+        auto begin = std::chrono::steady_clock::now();
+        dstar->init(arr[0],arr[1],arr[2],arr[3]); // set start to (0,0) and goal to (10,5)
+        dstar->updateCell(arr[4],arr[5],-1);     // установите ячейку (3,4) недоступной для обхода
+        dstar->updateCell(arr[6],arr[7],100); // установить набор (2,2), чтобы иметь стоимость 42,432
+
+        dstar->replan();               // plan a path
+        mypath = dstar->getPath();     // retrieve path
+        dstar->updateCell(1972,2873,-1);
+
+        dstar->updateStart(arr[8],arr[9]);      // установите начало на (0,0), а цель на (10,5)
+        dstar->replan();               // спланируйте путь
+        mypath = dstar->getPath();     // извлекать путь
+
+        dstar->updateGoal(arr[10],arr[11]);        // переместить цель на (0,1)
+        dstar->replan();               // спланируйте путь
+        mypath = dstar->getPath();     // извлекать путь
+
+        auto end = std::chrono::steady_clock::now();
+        auto elapsed_ms = std::chrono::duration_cast<std::chrono::milliseconds>(end - begin);
+        std::cout << "The time: " << elapsed_ms.count() << " ms\n";
+
     }
-    auto begin = std::chrono::steady_clock::now();
-    dstar->init(arr[0],arr[1],arr[2],arr[3]); // set start to (0,0) and goal to (10,5)
-    dstar->updateCell(arr[4],arr[5],-1);     // set cell (3,4) to be non traversable
-    dstar->updateCell(arr[6],arr[7],42.432); // set set (2,2) to have cost 42.432
-
-    dstar->replan();               // plan a path
-    mypath = dstar->getPath();     // retrieve path
-
-    dstar->updateStart(arr[8],arr[9]);      // move start to (10,2)
-    dstar->replan();               // plan a path
-    mypath = dstar->getPath();     // retrieve path
-
-    dstar->updateGoal(arr[10],arr[11]);        // move goal to (0,1)
-    dstar->replan();               // plan a path
-    mypath = dstar->getPath();     // retrieve path
-    auto end = std::chrono::steady_clock::now();
-    auto elapsed_ms = std::chrono::duration_cast<std::chrono::milliseconds>(end - begin);
-    std::cout << "The time: " << elapsed_ms.count() << " ms\n";
-    fclose(file);
-
 
     return 0;
 }
