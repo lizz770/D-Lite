@@ -1,125 +1,13 @@
 #include <iostream>
 #include <cmath>
-#include <queue>
 #include <list>
 #include<stdio.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <conio.h>
 #include <string>
 #include <chrono>
 #include <ext/hash_map>
-
+#include "main.h"
 using namespace std;
 using namespace __gnu_cxx;
-
-class state {
-public:
-    int x;
-    int y;
-    pair<double,double> k;
-
-    bool operator == (const state &s2) const {
-        return ((x == s2.x) && (y == s2.y));
-    }
-
-    bool operator != (const state &s2) const {
-        return ((x != s2.x) || (y != s2.y));
-    }
-
-    bool operator > (const state &s2) const {
-        if (k.first-0.00001 > s2.k.first) return true;
-        else if (k.first < s2.k.first-0.00001) return false;
-        return k.second > s2.k.second;
-    }
-
-    bool operator <= (const state &s2) const {
-        if (k.first < s2.k.first) return true;
-        else if (k.first > s2.k.first) return false;
-        return k.second < s2.k.second + 0.00001;
-    }
-
-
-    bool operator < (const state &s2) const {
-        if (k.first + 0.000001 < s2.k.first) return true;
-        else if (k.first - 0.000001 > s2.k.first) return false;
-        return k.second < s2.k.second;
-    }
-
-};
-struct ipoint2 {
-    int x,y;
-};
-//информация о ячейке
-struct cellInfo {
-
-    double g;
-    double rhs;
-    double cost;
-
-};
-
-class state_hash {
-public:
-    size_t operator()(const state &s) const {
-        return s.x + 34245*s.y;
-    }
-};
-
-
-typedef priority_queue<state, vector<state>, greater<state> > ds_pq;
-typedef hash_map<state,cellInfo, state_hash, equal_to<state> > ds_ch;
-typedef hash_map<state, float, state_hash, equal_to<state> > ds_oh;
-
-
-class Dstar {
-
-public:
-
-    Dstar();
-    void   init(int sX, int sY, int gX, int gY);
-    void   updateCell(int x, int y, double val);
-    void   updateStart(int x, int y);
-    void   updateGoal(int x, int y);
-    bool   replan();
-
-    list<state> getPath();
-
-private:
-
-    list<state> path;
-
-    double C1;
-    double k_m;
-    state s_start, s_goal, s_last;
-    int maxSteps;
-
-    ds_pq openList;
-    ds_ch cellHash;
-    ds_oh openHash;
-
-    bool   close(double x, double y);
-    void   makeNewCell(state u);
-    double getG(state u);
-    double getRHS(state u);
-    void   setG(state u, double g);
-    double setRHS(state u, double rhs);
-    double eightCondist(state a, state b);
-    int    computeShortestPath();
-    void   updateVertex(state u);
-    void   insert(state u);
-    void   remove(state u);
-    double trueDist(state a, state b);
-    double heuristic(state a, state b);
-    state  calculateKey(state u);
-    void   getSucc(state u, list<state> &s);
-    void   getPred(state u, list<state> &s);
-    double cost(state a, state b);
-    bool   occupied(state u);
-    bool   isValid(state u);
-    float  keyHashCode(state u);
-};
-
 
 //установка констант
 Dstar::Dstar() {
@@ -539,48 +427,12 @@ void Dstar::updateGoal(int x, int y) {
 путь, который находится под углом около 45 градусов к цели, мы разрываем связи, основанные на
 метрике евклида (состояние, цель) + евклидово (состояние, начало).
  */
+
 bool Dstar::replan() {
 
     path.clear();
     int res = computeShortestPath();
-    int curt=0;
 
-    for (int j=0;j<6;j++){
-        char out_f[120];
-        sprintf(out_f,"tes/%i/out.txt",curt);
-        FILE* file= fopen(out_f,"w+t");
-        fprintf(file ,
-                "computeShortestPath: %d,\n"
-                "openList.size: %d,\n"
-                "openHash.size: %d\n"
-                "openList.top.k.first_second: [%f %f]\n"
-                "s_start.k.first_second: [%f %f]\n"
-                "getRHS_getG: (%f,%f)\n",
-                res,
-                openList.size(),//кол-во оставшихся вершин в списке
-                openHash.size(),
-                openList.top().k.first,//первая вершина в открытом списке
-                openList.top().k.second,//последняя вершина в открытом списке
-                s_start.k.first,//1 значение начальной вершины
-                s_start.k.second,//2 значение начальной вергины
-                getRHS(s_start),//правое значение
-                getG(s_start));//значение G
-
-        curt++;
-    }
-    /*printf(""
-           "computeShortestPath: %d,\n"
-           "openList.size: %d,\n"
-           "openHash.size: %d\n"
-           "openList.top.k.first_second: [%f %f]\n"
-           "s_start.k.first_second: [%f %f]\n"
-           "getRHS_getG: (%f,%f)\n",
-           res,
-           openList.size(),
-           openHash.size(),
-           openList.top().k.first,openList.top().k.second,
-           s_start.k.first, s_start.k.second,
-           getRHS(s_start), getG(s_start));*/
     if (res < 0) {
         fprintf(stderr, "НЕТ ПУТИ К ЦЕЛИ\n");
         return false;
@@ -634,53 +486,73 @@ bool Dstar::replan() {
     path.push_back(s_goal);
     return true;
 }
+
 int main() {
     Dstar *dstar = new Dstar();
     list<state> mypath;
-    int cur=0;
 
-    int n1=12;
+    int n1=15;
     int arr[n1];
-    for (int j=0;j<6;j++)
+    auto begin = std::chrono::steady_clock::now();
+    for (int j=0;j<20;j++)
     {
-        char in_f[120];
 
-        sprintf(in_f,"tes/%i/in.txt",cur);
+        char in_f[400];
+
+        sprintf(in_f,"tes/%i/in.txt",j);
         FILE* in_file= fopen(in_f,"r");
-        for (int i = 0; i < n1; i++){
+
+        for (int i = 0; i < 20; i++){
             fscanf(in_file, "%d,", &arr[i] );
         }
-        for(int t=0;t<n1;t++){
-            cout<<arr[t]<<" ";
-        }
-        auto begin = std::chrono::steady_clock::now();
-        dstar->init(arr[0],arr[1],arr[2],arr[3]); // set start to (0,0) and goal to (10,5)
-        dstar->updateCell(arr[4],arr[5],-1);     // установите ячейку (3,4) недоступной для обхода
-        dstar->updateCell(arr[6],arr[7],100);// установить набор (2,2), чтобы иметь стоимость 42,432
+
+        dstar->init(arr[0],arr[1],arr[2],arr[3]); //начало на (0,0) и цель на (10,5)
+        dstar->updateCell(arr[4],arr[5],-1);     // ячейка (3,4) недоступной для обхода
+        dstar->updateCell(arr[6],arr[7],42.432);// ячейка (2,2), чтобы иметь стоимость 42,432
+
+        dstar->replan();               // спланировать путь
+        mypath = dstar->getPath();     // получить путь
+        dstar->updateCell(arr[8],arr[9],arr[10]);
 
 
-        dstar->replan();               // plan a path
-        mypath = dstar->getPath();     // retrieve path
-        dstar->updateCell(1972,2873,-1);
-
-        dstar->updateStart(arr[8],arr[9]);      // установите начало на (0,0), а цель на (10,5)
+        dstar->updateStart(arr[11],arr[12]);      // установите начало на (0,0), а цель на (10,5)
         dstar->replan();               // спланируйте путь
         mypath = dstar->getPath();     // извлекать путь
 
-        dstar->updateGoal(arr[10],arr[11]);        // переместить цель на (0,1)
+
+        dstar->updateGoal(arr[13],arr[14]);        // переместить цель на (0,1)
         dstar->replan();               // спланируйте путь
         mypath = dstar->getPath();     // извлекать путь
 
-        for(int t=0;t<n1;t++){
-            cout<<arr[t];
-        }
+        int res = dstar->computeShortestPath();
+        char out_f[400];
+        sprintf(out_f,"tes/%i/out.txt",j);
+        FILE* file= fopen(out_f,"w");
+        fprintf(file ,
+                "computeShortestPath: %d,\n"
+                "openList.size: %d,\n"
+                "openHash.size: %d\n"
+                "openList.top.k.first_second: [%f %f]\n"
+                "s_start.k.first_second: [%f %f]\n"
+                "getRHS_getG: (%f,%f)\n",
+                res,
+                dstar->openList.size(),//кол-во оставшихся вершин в списке
+                dstar->openHash.size(),
+                dstar->openList.top().k.first,//первая вершина в открытом списке
+                dstar->openList.top().k.second,//последняя вершина в открытом списке
+                dstar->s_start.k.first,//1 значение начальной вершины
+                dstar->s_start.k.second,//2 значение начальной вергины
+                dstar->getRHS(dstar->s_start),//правое значение
+                dstar->getG(dstar->s_start));//значение G
+
 
         auto end = std::chrono::steady_clock::now();
-        auto elapsed_ms = std::chrono::duration_cast<std::chrono::milliseconds>(end - begin);
-        std::cout << "The time: " << elapsed_ms.count() << " ms\n";
-
+        auto time = std::chrono::duration_cast<std::chrono::milliseconds>(end - begin);
+        //std::cout <<"Test:"<<j<< " the time: " << time.count() << " ms\n";
+        //cout<<time.count()<<'\n';
+        fclose(file);
+        fclose(in_file);
     }
-
 
     return 0;
 }
