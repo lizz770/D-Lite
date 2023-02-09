@@ -1,0 +1,6 @@
+computeShortestPath: 0,
+openList.size: 2,
+openHash.size: 2
+openList.top.k.first_second: [9385.331522 358.239682]
+s_start.k.first_second: [9162.224740 9162.224740]
+getRHS_getG: (9162.224740,9162.224740)
